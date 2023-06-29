@@ -22,6 +22,24 @@ export function Post({ author, content, publishedAt }) {
     setNewCommentText('')
   }
 
+  function handleDeleteComment(id) {
+    const commentWithoutDeletedOne = comments.filter((comment, index) => {
+      return index !== id
+    })
+    setComments(commentWithoutDeletedOne)
+  }
+
+  function handleNewCommentChange() {
+    event.target.setCustomValidity('')
+    setNewCommentText(event.target.value)
+  }
+
+  function handleNewCommentInvalid() {
+    event.target.setCustomValidity('Este campo é obrigatório!')
+  }
+
+  const isNewCommentEmpty = newCommentText.length === 0
+
   return (
     <article className={styles.post}>
       <header>
@@ -39,14 +57,14 @@ export function Post({ author, content, publishedAt }) {
       <div className={styles.content}>
         {content.map(post => {
           if (post.type === 'paragraph') {
-            return (<p>{post.content}</p>)
+            return (<p key={post.content}>{post.content}</p>)
           }
           if (post.type === 'link') {
             return (<p key={post.content}>👉 {' '}<a href="#">{post.content}</a></p>)
           }
           if (post.type === 'tags') {
             return (
-              <p>
+              <p key={post.content}>
                 {post.content.map((tag) => (<a href="#" key={tag}>{tag}{' '}</a>))}
               </p>
             )
@@ -60,16 +78,24 @@ export function Post({ author, content, publishedAt }) {
         <textarea
           placeholder="Deixe seu comentário"
           value={newCommentText}
-          onChange={(e) => setNewCommentText(e.target.value)}
+          onChange={handleNewCommentChange}
+          required
+          onInvalid={handleNewCommentInvalid}
         />
 
         <footer>
-          <button type="submit">Publicar</button>
+          <button type="submit" disabled={isNewCommentEmpty}>Publicar</button>
         </footer>
       </form>
 
       <div className={styles.commentList}>
-        {comments.map(comment => <Comment content={comment} />)}
+        {comments.map((comment, index) =>
+          <Comment
+            key={comment}
+            content={comment}
+            onDeleteComment={() => handleDeleteComment(index)}
+          />
+        )}
       </div>
     </article>
   )
